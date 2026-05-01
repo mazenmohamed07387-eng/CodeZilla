@@ -7,10 +7,10 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* إضافة ستايل إضافي للمكتبة والتحميل */
-        .progress-container { width: 100%; background: #111; border-radius: 5px; margin-top: 10px; display: none; }
-        .progress-bar { height: 10px; background: var(--primary-neon); width: 0%; border-radius: 5px; box-shadow: 0 0 10px var(--primary-neon); }
-        .status-text { color: var(--primary-neon); font-size: 0.9rem; margin-top: 5px; }
+        .progress-container { width: 100%; background: #111; border-radius: 5px; margin-top: 15px; display: none; border: 1px solid #333; }
+        .progress-bar { height: 12px; background: linear-gradient(90deg, #00f3ff, #bc00ff); width: 0%; border-radius: 5px; box-shadow: 0 0 15px #00f3ff; transition: 0.4s; }
+        .status-text { color: #00f3ff; font-size: 0.95rem; margin-top: 15px; word-break: break-all; font-family: monospace; }
+        .copy-btn { background: #bc00ff; color: white; border: none; padding: 8px 15px; cursor: pointer; margin-top: 15px; display: none; border-radius: 5px; font-weight: bold; box-shadow: 0 0 10px #bc00ff; }
     </style>
 </head>
 <body>
@@ -20,53 +20,52 @@
         <nav>
             <ul>
                 <li><a href="#">الرئيسية</a></li>
-                <li><a href="#">ملفاتي</a></li>
+                <li><a href="https://console.firebase.google.com/" target="_blank">لوحة التحكم</a></li>
             </ul>
         </nav>
     </header>
 
     <main>
         <section class="hero">
-            <h1 class="glitch">مركز رفع الملفات الآمن</h1>
-            <p>مرحباً بك يا مازن في المنطقة المشفرة.</p>
+            <h1 class="glitch">مركز رفع ملفات CodeZilla</h1>
+            <p>مرحباً يا مازن، السيرفر السحابي جاهز لاستقبال ملفاتك.</p>
             
             <div class="upload-container">
-                <div class="drop-zone" id="dropZone">
-                    <i class="fas fa-cloud-upload-alt"></i>
-                    <p>اسحب الملفات هنا أو اضغط للاختيار</p>
+                <div class="drop-zone">
+                    <i class="fas fa-cloud-upload-alt" style="font-size: 3rem; color: #bc00ff;"></i>
+                    <p>اختر الملف المراد تشفيره ورفعه</p>
                     <input type="file" id="fileInput" hidden>
-                    <button class="neon-btn" onclick="document.getElementById('fileInput').click()">اختر ملف</button>
+                    <button class="neon-btn" onclick="document.getElementById('fileInput').click()">اختيار ملف</button>
                     
                     <div class="progress-container" id="progCont">
                         <div class="progress-bar" id="progBar"></div>
                     </div>
                     <p class="status-text" id="status"></p>
+                    <button class="copy-btn" id="copyBtn">نسخ رابط الملف</button>
                 </div>
             </div>
         </section>
     </main>
 
     <footer>
-        <p>المصمم: <span class="designer">Mazen Mohamed</span></p>
-        <p class="link-display">mazentech.com</p>
+        <p>المطور: <span class="designer">Mazen Mohamed</span></p>
     </footer>
 
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-storage-compat.js"></script>
 
     <script>
-        // --- ابدأ التعديل هنا ---
-        // انسخ البيانات دي من Firebase Console (Project Settings -> Your Apps)
+        // بيانات الـ Config الجديدة الخاصة بك يا مازن
         const firebaseConfig = {
-            apiKey: "ضع_هنا_API_KEY",
-            authDomain: "اسم-مشروعك.firebaseapp.com",
-            projectId: "اسم-مشروعك",
-            storageBucket: "اسم-مشروعك.appspot.com",
-            messagingSenderId: "رقم_المرسل",
-            appId: "رقم_التطبيق"
+          apiKey: "AIzaSyA662gbWiCyQ58pobewQ4IfgOr9a23AOBQ",
+          authDomain: "codezilla-aabd1.firebaseapp.com",
+          projectId: "codezilla-aabd1",
+          storageBucket: "codezilla-aabd1.firebasestorage.app",
+          messagingSenderId: "1085363320749",
+          appId: "1:1085363320749:web:03707560a6cfac92a65324"
         };
-        // --- انتهى التعديل هنا ---
 
+        // بدء تشغيل فايربيز
         firebase.initializeApp(firebaseConfig);
         const storage = firebase.storage();
 
@@ -74,14 +73,17 @@
         const statusText = document.getElementById('status');
         const progBar = document.getElementById('progBar');
         const progCont = document.getElementById('progCont');
+        const copyBtn = document.getElementById('copyBtn');
 
         fileInput.onchange = (e) => {
             const file = e.target.files[0];
             if (!file) return;
 
             progCont.style.display = 'block';
-            statusText.innerText = 'جاري الرفع إلى السحابة...';
+            copyBtn.style.display = 'none';
+            statusText.innerText = 'جاري الاتصال بالسيرفر ورفع الملف...';
 
+            // رفع الملف لمجلد اسمه uploads
             const storageRef = storage.ref('uploads/' + file.name);
             const uploadTask = storageRef.put(file);
 
@@ -91,12 +93,17 @@
                     progBar.style.width = progress + '%';
                 }, 
                 (error) => {
-                    statusText.innerText = 'فشل الرفع: ' + error.message;
+                    statusText.innerText = 'خطأ: تأكد من تفعيل Storage في Firebase وتغيير Rules لـ true';
+                    console.error(error);
                 }, 
                 () => {
                     uploadTask.snapshot.ref.getDownloadURL().then((url) => {
-                        statusText.innerHTML = `تم الرفع! <a href="${url}" target="_blank" style="color:#fff">اضغط هنا لفتح الرابط</a>`;
-                        progBar.style.backgroundColor = '#00ff00';
+                        statusText.innerHTML = `تم الرفع بنجاح! ✅<br><a href="${url}" target="_blank" style="color:#00f3ff; text-decoration:underline;">تحميل الملف من هنا</a>`;
+                        copyBtn.style.display = 'inline-block';
+                        copyBtn.onclick = () => {
+                            navigator.clipboard.writeText(url);
+                            alert('تم نسخ الرابط بنجاح!');
+                        };
                     });
                 }
             );
