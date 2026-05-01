@@ -9,8 +9,9 @@
     <style>
         .progress-container { width: 100%; background: #111; border-radius: 5px; margin-top: 15px; display: none; border: 1px solid #333; }
         .progress-bar { height: 12px; background: linear-gradient(90deg, #00f3ff, #bc00ff); width: 0%; border-radius: 5px; box-shadow: 0 0 15px #00f3ff; transition: 0.4s; }
-        .status-text { color: #00f3ff; font-size: 0.95rem; margin-top: 15px; word-break: break-all; font-family: monospace; }
-        .copy-btn { background: #bc00ff; color: white; border: none; padding: 8px 15px; cursor: pointer; margin-top: 15px; display: none; border-radius: 5px; font-weight: bold; box-shadow: 0 0 10px #bc00ff; }
+        .status-text { color: #00f3ff; font-size: 0.95rem; margin-top: 15px; word-break: break-all; font-family: monospace; text-align: center; }
+        .copy-btn { background: #bc00ff; color: white; border: none; padding: 10px 20px; cursor: pointer; margin-top: 15px; display: none; border-radius: 5px; font-weight: bold; box-shadow: 0 0 15px #bc00ff; width: 100%; }
+        .neon-btn:hover { box-shadow: 0 0 20px #00f3ff; transform: scale(1.05); }
     </style>
 </head>
 <body>
@@ -21,13 +22,13 @@
 
     <main>
         <section class="hero">
-            <h1 class="glitch">مركز رفع CodeZilla v3</h1>
-            <p>مرحباً يا مازن، جرب الرفع الآن.</p>
+            <h1 class="glitch">مرحباً يا مازن</h1>
+            <p>ارفع ملفاتك الآن على سيرفر CodeZilla الجديد.</p>
             
             <div class="upload-container">
-                <div class="drop-zone">
-                    <i class="fas fa-cloud-upload-alt" style="font-size: 3rem; color: #bc00ff;"></i>
-                    <p>اختر الملف للرفع</p>
+                <div class="drop-zone" style="border: 2px dashed #bc00ff; padding: 30px; border-radius: 15px;">
+                    <i class="fas fa-cloud-upload-alt" style="font-size: 3.5rem; color: #00f3ff; margin-bottom: 15px;"></i>
+                    <p>اضغط لاختيار الملف</p>
                     <input type="file" id="fileInput" hidden>
                     <button class="neon-btn" onclick="document.getElementById('fileInput').click()">اختيار ملف</button>
                     
@@ -35,7 +36,7 @@
                         <div class="progress-bar" id="progBar"></div>
                     </div>
                     <p class="status-text" id="status"></p>
-                    <button class="copy-btn" id="copyBtn">نسخ الرابط</button>
+                    <button class="copy-btn" id="copyBtn"><i class="fas fa-copy"></i> نسخ رابط الملف</button>
                 </div>
             </div>
         </section>
@@ -49,14 +50,14 @@
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-storage-compat.js"></script>
 
     <script>
-        // بياناتك الجديدة يا مازن
+        // بيانات مشروعك الجديد codezilla-30d52
         const firebaseConfig = {
-            apiKey: "AIzaSyA662gbWiCyQ58pobewQ4IfgOr9a23AOBQ",
-            authDomain: "codezilla-aabd1.firebaseapp.com",
-            projectId: "codezilla-aabd1",
-            storageBucket: "codezilla-aabd1.firebasestorage.app",
-            messagingSenderId: "1085363320749",
-            appId: "1:1085363320749:web:228fecb90804e2d6a65324"
+            apiKey: "AIzaSyCFmMjaF1zr6Vm1GDB2-J054nmiwqKO7u8",
+            authDomain: "codezilla-30d52.firebaseapp.com",
+            projectId: "codezilla-30d52",
+            storageBucket: "codezilla-30d52.firebasestorage.app",
+            messagingSenderId: "345324319169",
+            appId: "1:345324319169:web:71ec9241da07859067bf40"
         };
 
         firebase.initializeApp(firebaseConfig);
@@ -73,7 +74,8 @@
             if (!file) return;
 
             progCont.style.display = 'block';
-            statusText.innerText = 'جاري محاولة الرفع...';
+            copyBtn.style.display = 'none';
+            statusText.innerText = 'جاري الرفع...';
 
             const storageRef = storage.ref('uploads/' + file.name);
             const uploadTask = storageRef.put(file);
@@ -81,25 +83,4 @@
             uploadTask.on('state_changed', 
                 (snapshot) => {
                     const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                    progBar.style.width = progress + '%';
-                    statusText.innerText = 'تم رفع: ' + Math.round(progress) + '%';
-                }, 
-                (error) => {
-                    statusText.innerText = '⚠️ خطأ: السيرفر لسه مقفول من Firebase Rules';
-                    console.error(error);
-                }, 
-                () => {
-                    uploadTask.snapshot.ref.getDownloadURL().then((url) => {
-                        statusText.innerHTML = `✅ تم الرفع!<br><a href="${url}" target="_blank" style="color:#00f3ff;">تحميل الملف</a>`;
-                        copyBtn.style.display = 'inline-block';
-                        copyBtn.onclick = () => {
-                            navigator.clipboard.writeText(url);
-                            alert('تم النسخ!');
-                        };
-                    });
-                }
-            );
-        };
-    </script>
-</body>
-</html>
+                    progBar.
