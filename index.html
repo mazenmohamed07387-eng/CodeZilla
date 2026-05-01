@@ -17,23 +17,17 @@
 
     <header>
         <div class="logo">CODE<span>ZILLA</span></div>
-        <nav>
-            <ul>
-                <li><a href="#">الرئيسية</a></li>
-                <li><a href="https://console.firebase.google.com/" target="_blank">لوحة التحكم</a></li>
-            </ul>
-        </nav>
     </header>
 
     <main>
         <section class="hero">
-            <h1 class="glitch">مركز رفع ملفات CodeZilla</h1>
-            <p>مرحباً يا مازن، السيرفر السحابي جاهز لاستقبال ملفاتك.</p>
+            <h1 class="glitch">مركز رفع CodeZilla v3</h1>
+            <p>مرحباً يا مازن، جرب الرفع الآن.</p>
             
             <div class="upload-container">
                 <div class="drop-zone">
                     <i class="fas fa-cloud-upload-alt" style="font-size: 3rem; color: #bc00ff;"></i>
-                    <p>اختر الملف المراد تشفيره ورفعه</p>
+                    <p>اختر الملف للرفع</p>
                     <input type="file" id="fileInput" hidden>
                     <button class="neon-btn" onclick="document.getElementById('fileInput').click()">اختيار ملف</button>
                     
@@ -41,7 +35,7 @@
                         <div class="progress-bar" id="progBar"></div>
                     </div>
                     <p class="status-text" id="status"></p>
-                    <button class="copy-btn" id="copyBtn">نسخ رابط الملف</button>
+                    <button class="copy-btn" id="copyBtn">نسخ الرابط</button>
                 </div>
             </div>
         </section>
@@ -55,17 +49,16 @@
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-storage-compat.js"></script>
 
     <script>
-        // بيانات الـ Config الجديدة الخاصة بك يا مازن
+        // بياناتك الجديدة يا مازن
         const firebaseConfig = {
-          apiKey: "AIzaSyA662gbWiCyQ58pobewQ4IfgOr9a23AOBQ",
-          authDomain: "codezilla-aabd1.firebaseapp.com",
-          projectId: "codezilla-aabd1",
-          storageBucket: "codezilla-aabd1.firebasestorage.app",
-          messagingSenderId: "1085363320749",
-          appId: "1:1085363320749:web:03707560a6cfac92a65324"
+            apiKey: "AIzaSyA662gbWiCyQ58pobewQ4IfgOr9a23AOBQ",
+            authDomain: "codezilla-aabd1.firebaseapp.com",
+            projectId: "codezilla-aabd1",
+            storageBucket: "codezilla-aabd1.firebasestorage.app",
+            messagingSenderId: "1085363320749",
+            appId: "1:1085363320749:web:228fecb90804e2d6a65324"
         };
 
-        // بدء تشغيل فايربيز
         firebase.initializeApp(firebaseConfig);
         const storage = firebase.storage();
 
@@ -80,10 +73,8 @@
             if (!file) return;
 
             progCont.style.display = 'block';
-            copyBtn.style.display = 'none';
-            statusText.innerText = 'جاري الاتصال بالسيرفر ورفع الملف...';
+            statusText.innerText = 'جاري محاولة الرفع...';
 
-            // رفع الملف لمجلد اسمه uploads
             const storageRef = storage.ref('uploads/' + file.name);
             const uploadTask = storageRef.put(file);
 
@@ -91,18 +82,19 @@
                 (snapshot) => {
                     const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
                     progBar.style.width = progress + '%';
+                    statusText.innerText = 'تم رفع: ' + Math.round(progress) + '%';
                 }, 
                 (error) => {
-                    statusText.innerText = 'خطأ: تأكد من تفعيل Storage في Firebase وتغيير Rules لـ true';
+                    statusText.innerText = '⚠️ خطأ: السيرفر لسه مقفول من Firebase Rules';
                     console.error(error);
                 }, 
                 () => {
                     uploadTask.snapshot.ref.getDownloadURL().then((url) => {
-                        statusText.innerHTML = `تم الرفع بنجاح! ✅<br><a href="${url}" target="_blank" style="color:#00f3ff; text-decoration:underline;">تحميل الملف من هنا</a>`;
+                        statusText.innerHTML = `✅ تم الرفع!<br><a href="${url}" target="_blank" style="color:#00f3ff;">تحميل الملف</a>`;
                         copyBtn.style.display = 'inline-block';
                         copyBtn.onclick = () => {
                             navigator.clipboard.writeText(url);
-                            alert('تم نسخ الرابط بنجاح!');
+                            alert('تم النسخ!');
                         };
                     });
                 }
