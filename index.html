@@ -6,6 +6,12 @@
     <title>CodeZilla | Cloud Storage</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* إضافة ستايل إضافي للمكتبة والتحميل */
+        .progress-container { width: 100%; background: #111; border-radius: 5px; margin-top: 10px; display: none; }
+        .progress-bar { height: 10px; background: var(--primary-neon); width: 0%; border-radius: 5px; box-shadow: 0 0 10px var(--primary-neon); }
+        .status-text { color: var(--primary-neon); font-size: 0.9rem; margin-top: 5px; }
+    </style>
 </head>
 <body>
 
@@ -15,22 +21,26 @@
             <ul>
                 <li><a href="#">الرئيسية</a></li>
                 <li><a href="#">ملفاتي</a></li>
-                <li><a href="#">الإعدادات</a></li>
             </ul>
         </nav>
     </header>
 
     <main>
         <section class="hero">
-            <h1 class="glitch" data-text="مركز رفع الملفات الآمن">مركز رفع الملفات الآمن</h1>
-            <p>مرحباً بك في المنطقة المشفرة. ارفع ملفاتك الآن.</p>
+            <h1 class="glitch">مركز رفع الملفات الآمن</h1>
+            <p>مرحباً بك يا مازن في المنطقة المشفرة.</p>
             
             <div class="upload-container">
-                <div class="drop-zone">
+                <div class="drop-zone" id="dropZone">
                     <i class="fas fa-cloud-upload-alt"></i>
                     <p>اسحب الملفات هنا أو اضغط للاختيار</p>
                     <input type="file" id="fileInput" hidden>
-                    <button class="neon-btn">اختر ملف</button>
+                    <button class="neon-btn" onclick="document.getElementById('fileInput').click()">اختر ملف</button>
+                    
+                    <div class="progress-container" id="progCont">
+                        <div class="progress-bar" id="progBar"></div>
+                    </div>
+                    <p class="status-text" id="status"></p>
                 </div>
             </div>
         </section>
@@ -41,5 +51,56 @@
         <p class="link-display">mazentech.com</p>
     </footer>
 
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-storage-compat.js"></script>
+
+    <script>
+        // --- ابدأ التعديل هنا ---
+        // انسخ البيانات دي من Firebase Console (Project Settings -> Your Apps)
+        const firebaseConfig = {
+            apiKey: "ضع_هنا_API_KEY",
+            authDomain: "اسم-مشروعك.firebaseapp.com",
+            projectId: "اسم-مشروعك",
+            storageBucket: "اسم-مشروعك.appspot.com",
+            messagingSenderId: "رقم_المرسل",
+            appId: "رقم_التطبيق"
+        };
+        // --- انتهى التعديل هنا ---
+
+        firebase.initializeApp(firebaseConfig);
+        const storage = firebase.storage();
+
+        const fileInput = document.getElementById('fileInput');
+        const statusText = document.getElementById('status');
+        const progBar = document.getElementById('progBar');
+        const progCont = document.getElementById('progCont');
+
+        fileInput.onchange = (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            progCont.style.display = 'block';
+            statusText.innerText = 'جاري الرفع إلى السحابة...';
+
+            const storageRef = storage.ref('uploads/' + file.name);
+            const uploadTask = storageRef.put(file);
+
+            uploadTask.on('state_changed', 
+                (snapshot) => {
+                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    progBar.style.width = progress + '%';
+                }, 
+                (error) => {
+                    statusText.innerText = 'فشل الرفع: ' + error.message;
+                }, 
+                () => {
+                    uploadTask.snapshot.ref.getDownloadURL().then((url) => {
+                        statusText.innerHTML = `تم الرفع! <a href="${url}" target="_blank" style="color:#fff">اضغط هنا لفتح الرابط</a>`;
+                        progBar.style.backgroundColor = '#00ff00';
+                    });
+                }
+            );
+        };
+    </script>
 </body>
 </html>
